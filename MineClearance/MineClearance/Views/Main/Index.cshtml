@@ -1,0 +1,616 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>骑马打仗，扫地雷啦</title>
+    <style>
+        .cover {
+            height: 30px;
+            width: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="battleground">
+    </div>
+
+</body>
+</html>
+<script src="~/Scripts/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        layMines();
+        layout();
+        MinesMessage();
+    });
+
+    //判断数组是否包含有某一项
+    Array.prototype.contains = function (needle) {
+        for (i in this) {
+            if (this[i] == needle) return true;
+        }
+        return false;
+    }
+
+    //行数
+    var row = 9;
+    //列数
+    var list = 9;
+    //雷的总数
+    var mine = 10;
+    //雷的数组
+    var mineArray = [];
+    //未掀开的个数
+    var residue = row * list;
+    //随机决定雷的位置
+    function layMines() {
+        //格子数
+        var lattice = row * list;
+        for (var i = 0; i < mine; i++) {
+            //在格子数范围内生成随机数
+            var temp = Math.floor(Math.random() * lattice);
+            if (!mineArray.contains(temp)) {
+                mineArray.push(temp);
+            } else {
+                i = i - 1;
+            }
+        }
+    }
+
+    //生成页面布局（布雷）
+    function layout() {
+        var html = '';
+        for (var i = 0; i < row; i++) {
+            var child = '<div name="' + i + '">';
+            for (var j = 0; j < list; j++) {
+                //填充雷 name="true"为雷  name="false"不是雷
+                var post = i * row + j + 1;
+                if (mineArray.contains(post)) {
+                    child += '<input type="button" hidden="hidden" class="cover" id="Mine' + i + j + '"  name="true" value="L" /><input id="MinePre' + i + j + '" type="button" class="cover" onclick="tread(' + i + ',' + j + ')" style="display: inline;" />';
+                } else {
+                    child += '<input type="button" hidden="hidden" class="cover" id="Mine' + i + j + '"  name="false"/><input id="MinePre' + i + j + '" type="button" class="cover" onclick="tread(' + i + ',' + j + ')" style="display: inline;" />';
+                }
+            }
+            child += '</div>';
+            html += child;
+        }
+        document.getElementById("battleground").innerHTML = html;
+    }
+
+    //生成地雷周围的数字 好难呀ToT
+    function MinesMessage() {
+        for (var i = 0; i < row; i++) {
+            for (var j = 0; j < list; j++) {
+                //当前位置
+                var post = i * row + j + 1;
+                var num = 0;
+                //不是雷
+                if (!mineArray.contains(post)) {
+                    //post在左上角
+                    if (i == 0 && j == 0) {
+                        //post的右下角
+                        if (mineArray.contains((i + 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在右上角
+                    if (i == 0 && j == 8) {
+                        //post的左下角
+                        if (mineArray.contains((i + 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在第一行（不包含左上角和右上角）
+                    if (i == 0 && (j != 8 && j != 0)) {
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左下角
+                        if (mineArray.contains((i + 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右下角
+                        if (mineArray.contains((i + 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在第后一行（不包含左下角和右下角）
+                    if (i == 8 && (j != 8 && j != 0)) {
+                        //post的左上角
+                        if (mineArray.contains((i - 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右上角
+                        if (mineArray.contains((i - 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在左下角
+                    if (i == 8 && j == 0) {
+                        //post的右上角
+                        if (mineArray.contains((i - 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在右下角
+                    if (i == 8 && j == 8) {
+                        //post的左上角
+                        if (mineArray.contains((i - 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在第一列（不包含左上角和左下角）
+                    if (j == 0 && (i != 8 && i != 0)) {
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右上角
+                        if (mineArray.contains((i - 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右下角
+                        if (mineArray.contains((i + 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在第后一列（不包含右上角和右下角）
+                    if (j == 8 && (i != 8 && i != 0)) {
+                        //post的左上角
+                        if (mineArray.contains((i - 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左下角
+                        if (mineArray.contains((i + 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    //post在中间的区域
+                    if (i != 0 && j != 0 && j != 8 && i != 8) {
+                        //post的左上角
+                        if (mineArray.contains((i - 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的上方
+                        if (mineArray.contains((i - 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右上角
+                        if (mineArray.contains((i - 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左方
+                        if (mineArray.contains((i) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的右方
+                        if (mineArray.contains((i) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的左下角
+                        if (mineArray.contains((i + 1) * row + (j - 1) + 1)) {
+                            num += 1;
+                        }
+                        //post的下方
+                        if (mineArray.contains((i + 1) * row + (j) + 1)) {
+                            num += 1;
+                        }
+                        //post的右下角
+                        if (mineArray.contains((i + 1) * row + (j + 1) + 1)) {
+                            num += 1;
+                        }
+                    }
+                    document.getElementById("Mine" + i + j).value = num;
+                }
+            }
+        }
+    }
+
+    //e=1 踩雷， e=0为没有雷时掀开周围的区域，木有思路
+    //观察windows程序后 发现掀开时只判断了上下左右的是否是雷
+    //现在只掀开0周围的
+    function tread(i, j) {
+        var e = document.getElementById("Mine" + i + j).value;
+        if (e == "L") {
+            alert("bomb 游戏结束！");
+        } else {
+            $("#Mine" + i + j).show();
+            $("#MinePre" + i + j).hide();
+            residue = residue - 1;
+            if (residue == mine) {
+                alert("congratulation! You survived.");
+                return;
+            }
+            //只掀开0周围的
+            if (e == "0") {
+                //post在左上角
+                if (i == 0 && j == 0) {
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右下角
+                    if ($("#Mine" + (i + 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右下角
+                    $("#Mine" + (i + 1) + (j + 1)).show();
+                    $("#MinePre" + (i + 1) + (j + 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+
+                }
+                //post在右上角
+                if (i == 0 && j == 8) {
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左下角
+                    if ($("#Mine" + (i + 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左下角
+                    $("#Mine" + (i + 1) + (j - 1)).show();
+                    $("#MinePre" + (i + 1) + (j - 1)).hide();
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+                    
+                }
+                //post在第一行（不包含左上角和右上角）
+                if (i == 0 && (j != 8 && j != 0)) {
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左下角
+                    if ($("#Mine" + (i + 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右下角
+                    if ($("#Mine" + (i + 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                    //post的左下角
+                    $("#Mine" + (i + 1) + (j - 1)).show();
+                    $("#MinePre" + (i + 1) + (j - 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+                    //post的右下角
+                    $("#Mine" + (i + 1) + (j + 1)).show();
+                    $("#MinePre" + (i + 1) + (j + 1)).hide();
+                }
+                //post在最后一行（不包含左下角和右下角）
+                if (i == 8 && (j != 8 && j != 0)) {
+                    //post的左上角
+                    if ($("#Mine" + (i - 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右上角
+                    if ($("#Mine" + (i - 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左上角
+                    $("#Mine" + (i - 1) + (j - 1)).show();
+                    $("#MinePre" + (i - 1) + (j - 1)).hide();
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的右上角
+                    $("#Mine" + (i - 1) + (j + 1)).show();
+                    $("#MinePre" + (i - 1) + (j + 1)).hide();
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                }
+                //post在左下角
+                if (i == 8 && j == 0) {
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右上角
+                    if ($("#Mine" + (i - 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的右上角
+                    $("#Mine" + (i - 1) + (j + 1)).show();
+                    $("#MinePre" + (i - 1) + (j + 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                }
+                //post在右下角
+                if (i == 8 && j == 8) {
+                    //post的左上角
+                    if ($("#Mine" + (i - 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左上角
+                    $("#Mine" + (i - 1) + (j - 1)).show();
+                    $("#MinePre" + (i - 1) + (j - 1)).hide();
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                }
+                //post在第一列（不包含左上角和左下角）
+                if (j == 0 && (i != 8 && i != 0)) {
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右上角
+                    if ($("#Mine" + (i - 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右下角
+                    if ($("#Mine" + (i + 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的右上角
+                    $("#Mine" + (i - 1) + (j + 1)).show();
+                    $("#MinePre" + (i - 1) + (j + 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+                    //post的右下角
+                    $("#Mine" + (i + 1) + (j + 1)).show();
+                    $("#MinePre" + (i + 1) + (j + 1)).hide();
+                }
+                //post在最后一列（不包含右上角和右下角）
+                if (j == 8 && (i != 8 && i != 0)) {
+                    //post的左上角
+                    if ($("#Mine" + (i - 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左下角
+                    if ($("#Mine" + (i + 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左上角
+                    $("#Mine" + (i - 1) + (j - 1)).show();
+                    $("#MinePre" + (i - 1) + (j - 1)).hide();
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                    //post的左下角
+                    $("#Mine" + (i + 1) + (j - 1)).show();
+                    $("#MinePre" + (i + 1) + (j - 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+                }
+                //post在中间的区域
+                if (i != 0 && j != 0 && j != 8 && i != 8) {
+                    //post的左上角
+                    if ($("#Mine" + (i - 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的上方
+                    if ($("#Mine" + (i - 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右上角
+                    if ($("#Mine" + (i - 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左方
+                    if ($("#Mine" + i + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右方
+                    if ($("#Mine" + i + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左下角
+                    if ($("#Mine" + (i + 1) + (j - 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的下方
+                    if ($("#Mine" + (i + 1) + j).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的右下角
+                    if ($("#Mine" + (i + 1) + (j + 1)).is(":hidden")) {
+                        residue = residue - 1;
+                    }
+                    //post的左上角
+                    $("#Mine" + (i - 1) + (j - 1)).show();
+                    $("#MinePre" + (i - 1) + (j - 1)).hide();
+                    //post的上方
+                    $("#Mine" + (i - 1) + j).show();
+                    $("#MinePre" + (i - 1) + j).hide();
+                    //post的右上角
+                    $("#Mine" + (i - 1) + (j + 1)).show();
+                    $("#MinePre" + (i - 1) + (j + 1)).hide();
+                    //post的左方
+                    $("#Mine" + i + (j - 1)).show();
+                    $("#MinePre" + i + (j - 1)).hide();
+                    //post的右方
+                    $("#Mine" + i + (j + 1)).show();
+                    $("#MinePre" + i + (j + 1)).hide();
+                    //post的左下角
+                    $("#Mine" + (i + 1) + (j - 1)).show();
+                    $("#MinePre" + (i + 1) + (j - 1)).hide();
+                    //post的下方
+                    $("#Mine" + (i + 1) + j).show();
+                    $("#MinePre" + (i + 1) + j).hide();
+                    //post的右下角
+                    $("#Mine" + (i + 1) + (j + 1)).show();
+                    $("#MinePre" + (i + 1) + (j + 1)).hide();
+                }
+            }
+        }
+    }
+</script>
